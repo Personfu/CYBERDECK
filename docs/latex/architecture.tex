@@ -1,0 +1,205 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{graphicx,hyperref,xcolor,listings,booktabs,fancyhdr,titlesec}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+\definecolor{cyber}{HTML}{00FFD6}
+\definecolor{bg}{HTML}{0A0A0A}
+\definecolor{mg}{HTML}{FF66AC}
+\hypersetup{colorlinks,linkcolor=cyber,urlcolor=cyber}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\textcolor{cyber}{\textbf{FLLC CYBERDECK}}}
+\fancyhead[R]{\textcolor{mg}{\thepage}}
+\fancyfoot[C]{\small\textcolor{gray}{Authorized Hardware Analysis Platform --- Internal Use Only}}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\titleformat{\section}{\Large\bfseries\color{cyber}}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries\color{mg}}{\thesubsection}{1em}{}
+
+\lstset{basicstyle=\ttfamily\small, backgroundcolor=\color{black!5},
+        frame=single, rulecolor=\color{gray}, breaklines=true}
+
+\title{%
+  \vspace{-1cm}
+  {\Huge\bfseries\textcolor{cyber}{FLLC CyberDeck}}\\[6pt]
+  {\Large Architecture \& Design Document}\\[4pt]
+  {\normalsize Version 2.0 --- \today}
+}
+\author{FLLC Engineering Division}
+\date{}
+
+\begin{document}
+\maketitle
+\thispagestyle{fancy}
+\tableofcontents
+\newpage
+
+%----------------------------------------------------------------------
+\section{Executive Overview}
+FLLC CyberDeck is a local-first, Docker-composed hardware-analysis workbench
+designed for the Raspberry Pi~400 CyberDeck build (DFRobot 3.5'' TFT,
+TP-Link TL-WN722N, Adafruit enclosure), small x86 workstations, and internal bench
+appliances.  It provides:
+\begin{itemize}
+  \item Project / target / session / evidence tracking
+  \item Hardware interface documentation (UART, I2C, SPI, JTAG/SWD, eMMC)
+  \item Passive IoT inventory with CSV import/export
+  \item JWT-authenticated multi-user access
+  \item Local AI assistance via Ollama or OpenAI-compatible endpoints
+  \item Evidence artifact upload with SHA-256 integrity
+  \item Printable HTML reports with severity matrix and browser PDF export
+  \item GitHub Actions CI/CD with container publishing to GHCR
+\end{itemize}
+
+%----------------------------------------------------------------------
+\section{System Architecture}
+
+\subsection{Component Diagram}
+\begin{verbatim}
++-----------+      +------------+      +------------+
+|  Web UI   |----->|  FastAPI   |----->|   Worker   |
+| Express   | :3000|  API :8000 |      | Python bg  |
++-----------+      +-----+------+      +------+-----+
+                         |                    |
+                   +-----v----+         +-----v-----+
+                   | SQLite / |         |  /data/    |
+                   | state.json|        |  reports/  |
+                   +----------+         |  uploads/  |
+                                        +-----------+
+                   +--------------+
+                   | Ollama :11434|  (optional)
+                   +--------------+
+\end{verbatim}
+
+\subsection{Service Inventory}
+\begin{tabular}{llll}
+\toprule
+\textbf{Service} & \textbf{Tech} & \textbf{Port} & \textbf{Role}\\
+\midrule
+\texttt{api}    & FastAPI / Python 3.11 & 8000 & REST API, auth, state \\
+\texttt{web}    & Express / Node 18     & 3000 & UI proxy, static HTML  \\
+\texttt{worker} & Python 3.11           & ---  & Background report gen  \\
+\texttt{ollama} & Ollama (optional)     & 11434& Local LLM inference    \\
+\bottomrule
+\end{tabular}
+
+%----------------------------------------------------------------------
+\section{Authentication}
+\begin{itemize}
+  \item \textbf{Mechanism}: JWT bearer tokens via \texttt{/auth/login}
+  \item \textbf{Default credentials}: \texttt{admin / cyberdeck} (change immediately)
+  \item \textbf{Token lifetime}: 24 hours
+  \item \textbf{Storage}: Credentials hashed with SHA-256 in state file
+  \item \textbf{Middleware}: \texttt{verify\_token()} dependency on protected routes
+\end{itemize}
+
+%----------------------------------------------------------------------
+\section{Data Model}
+\begin{tabular}{ll}
+\toprule
+\textbf{Entity} & \textbf{Key Fields} \\
+\midrule
+Project         & id, name, summary, classification, authorization\_scope \\
+DeviceTarget    & id, project\_id, name, kind, vendor, model, firmware\_version \\
+HardwareSession & id, project\_id, target\_id, interface\_type, voltage, pin\_map \\
+EvidenceArtifact& id, project\_id, kind, path, sha256, notes \\
+Report          & id, project\_id, title, state, findings[], generated\_at \\
+AgentTask       & id, project\_id, mode, state \\
+\bottomrule
+\end{tabular}
+
+%----------------------------------------------------------------------
+\section{AI Integration}
+Three adapters are supported:
+\begin{enumerate}
+  \item \textbf{NoneAdapter} --- passthrough, app works fully
+  \item \textbf{OllamaAdapter} --- real HTTP calls to \texttt{/api/generate},
+        health-checked at \texttt{/api/tags}
+  \item \textbf{OpenAICompatibleAdapter} --- any \texttt{/v1/chat/completions}
+        endpoint
+\end{enumerate}
+AI is \textbf{never} used for payload generation or exploitation.
+
+%----------------------------------------------------------------------
+\section{Reporting}
+Reports are generated as self-contained HTML with:
+\begin{itemize}
+  \item Title page with project metadata
+  \item Authorization statement
+  \item Executive summary (optionally AI-assisted)
+  \item Findings table with severity matrix (CRITICAL / HIGH / MEDIUM / LOW / INFO)
+  \item Evidence references with SHA-256 hashes
+  \item Analyst notes, recommendations, appendix
+  \item Print CSS and \texttt{window.print()} button for browser PDF export
+\end{itemize}
+
+%----------------------------------------------------------------------
+\section{File Upload}
+\begin{itemize}
+  \item Endpoint: \texttt{POST /upload}
+  \item Max size: 50\,MB (configurable)
+  \item Storage: \texttt{/data/uploads/<uuid>/<filename>}
+  \item Integrity: SHA-256 computed on upload, stored in artifact metadata
+  \item Download: \texttt{GET /uploads/<artifact\_id>/<filename>}
+\end{itemize}
+
+%----------------------------------------------------------------------
+\section{CSV Import/Export}
+\begin{itemize}
+  \item \texttt{GET /projects/\{id\}/targets/export.csv} --- export targets
+  \item \texttt{POST /projects/\{id\}/targets/import} --- import CSV
+  \item Columns: name, kind, vendor, model, firmware\_version, environment, notes, tags
+\end{itemize}
+
+%----------------------------------------------------------------------
+\section{CI/CD Pipeline}
+\begin{tabular}{ll}
+\toprule
+\textbf{Workflow} & \textbf{Triggers} \\
+\midrule
+\texttt{ci.yml}      & push to main/develop, PRs \\
+\texttt{release.yml} & tag \texttt{v*} \\
+\bottomrule
+\end{tabular}
+
+Jobs: API pytest, LaTeX PDF build, Docker build matrix, Compose smoke test,
+GHCR image push, GitHub Release with PDF artifacts.
+
+%----------------------------------------------------------------------
+\section{Safety Boundary}
+See \texttt{docs/SAFETY\_BOUNDARY.md}.  This platform \textbf{prohibits}:
+exploit execution, brute forcing, credential harvesting, malware generation,
+evasion workflows, persistence mechanisms, and one-click attacks.
+This is NOT a MACOBOX clone, exploit framework, or offensive tool.
+
+%----------------------------------------------------------------------
+\section{Raspberry Pi 400 CyberDeck Build}
+This platform is designed around the SATUNIX/CYBERDECK hardware BOM:
+\begin{itemize}
+  \item \textbf{Pi 400} --- keyboard-integrated SBC, Kali Linux ARM 64-bit
+  \item \textbf{DFRobot 3.5'' TFT} --- SPI display, waveshare35a dtoverlay
+  \item \textbf{TP-Link TL-WN722N v2/v3} --- external WiFi, requires aircrack-ng driver patch
+  \item \textbf{Adafruit CyberDeck} --- enclosure and mounting
+  \item \textbf{ANKO Battery Pack} --- 5V/2A USB-C portable power
+\end{itemize}
+
+Display configuration in \texttt{/boot/config.txt}:
+\begin{lstlisting}
+dtoverlay=waveshare35a,rotate=270,invertx=1,swapxy=1
+\end{lstlisting}
+
+Setup scripts:
+\begin{lstlisting}[language=bash]
+sudo ./scripts/requirements_setup.sh
+sudo ./scripts/lcd_install.sh
+sudo ./scripts/tplink_patch.sh
+\end{lstlisting}
+
+\vfill
+\begin{center}
+\textcolor{gray}{\small\copyright\ FLLC \the\year.  For internal authorized use only.}
+\end{center}
+\end{document}

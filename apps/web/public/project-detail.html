@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Project Detail - FLLC CyberDeck</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #050505; color: #bfffcf; font-family: 'Segoe UI', 'Inter', monospace; min-height: 100vh; }
+    header { padding: 20px 30px; border-bottom: 3px solid #00ffd6; background: #0a0a0a; }
+    h1 { text-transform: uppercase; letter-spacing: 3px; font-size: 1.5rem; color: #00ffd6; }
+    nav { padding: 15px 30px; background: #0a0a0a; border-bottom: 1px solid #222; }
+    nav a { color: #7df; text-decoration: none; margin-right: 25px; text-transform: uppercase; font-size: 13px; }
+    nav a:hover { color: #00ffd6; }
+    main { padding: 30px; max-width: 1200px; margin: 0 auto; }
+    .panel { background: #0a0a0a; border: 1px solid #222; border-radius: 8px; padding: 25px; margin: 20px 0; }
+    .panel h2 { color: #00ffd6; text-transform: uppercase; font-size: 13px; border-bottom: 1px solid #333; padding-bottom: 12px; margin-bottom: 15px; }
+    .chip { display: inline-block; padding: 4px 10px; background: #001a1a; color: #0f0; border-radius: 4px; font-size: 11px; text-transform: uppercase; margin-right: 8px; }
+    table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+    th, td { text-align: left; padding: 12px; border-bottom: 1px solid #222; }
+    th { color: #0ff; text-transform: uppercase; font-size: 11px; }
+    td { color: #bbb; font-size: 13px; }
+    .item { background: #071010; border: 1px solid #003; border-radius: 4px; padding: 15px; margin: 10px 0; }
+    footer { text-align: center; padding: 30px; color: #444; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <header><h1>FLLC CyberDeck - Project Detail</h1></header>
+  <nav>
+    <a href="/">DASHBOARD</a>
+    <a href="/projects">PROJECTS</a>
+    <a href="/sessions">SESSIONS</a>
+    <a href="/reports">REPORTS</a>
+    <a href="/settings">SETTINGS</a>
+    <a href="/safety">SAFETY</a>
+  </nav>
+  <main>
+    <div class="panel">
+      <h2>Project Information</h2>
+      <div id="project-info">Loading...</div>
+    </div>
+    <div class="panel">
+      <h2>Targets</h2>
+      <div id="targets">Loading...</div>
+    </div>
+    <div class="panel">
+      <h2>Hardware Sessions</h2>
+      <div id="sessions">Loading...</div>
+    </div>
+  </main>
+  <footer>FLLC CyberDeck - Authorized Hardware Analysis Platform</footer>
+  <script>
+    const projectId = window.location.pathname.split('/').pop();
+
+    fetch(`/api/projects/${projectId}`).then(r=>r.json()).then(p=>{
+      document.getElementById('project-info').innerHTML = `
+        <h3 style="color:#00ffd6;margin-bottom:15px">${p.name}</h3>
+        <p style="margin-bottom:10px">${p.summary || 'No summary'}</p>
+        <span class="chip">${p.classification}</span>
+        <span class="chip">${p.authorization_scope || 'NO SCOPE'}</span>
+        <p style="margin-top:15px;color:#666;font-size:12px">Created: ${p.created_at}</p>
+      `;
+    }).catch(e=>document.getElementById('project-info').innerText='Error loading project');
+
+    fetch(`/api/projects/${projectId}/targets`).then(r=>r.json()).then(targets=>{
+      if(targets.length === 0) {
+        document.getElementById('targets').innerHTML = '<p style="color:#666">No targets</p>';
+        return;
+      }
+      const html = targets.map(t=>`
+        <div class="item">
+          <strong style="color:#0ff">${t.name}</strong>
+          <span class="chip">${t.kind}</span>
+          <p style="margin-top:8px;color:#888;font-size:12px">${t.vendor} ${t.model} - FW: ${t.firmware_version || 'N/A'}</p>
+        </div>
+      `).join('');
+      document.getElementById('targets').innerHTML = html;
+    }).catch(e=>document.getElementById('targets').innerText='Error loading targets');
+
+    fetch(`/api/projects/${projectId}/sessions`).then(r=>r.json()).then(sessions=>{
+      if(sessions.length === 0) {
+        document.getElementById('sessions').innerHTML = '<p style="color:#666">No sessions</p>';
+        return;
+      }
+      const html = sessions.map(s=>`
+        <div class="item">
+          <span class="chip">${s.interface_type}</span>
+          <span class="chip">${s.voltage}</span>
+          <p style="margin-top:8px;color:#888;font-size:12px">Adapter: ${s.adapter || 'N/A'}</p>
+          <p style="color:#666;font-size:12px">Pin Map: ${s.pin_map || 'N/A'}</p>
+          <p style="margin-top:8px;color:#bbb">${s.observations || 'No observations'}</p>
+        </div>
+      `).join('');
+      document.getElementById('sessions').innerHTML = html;
+    }).catch(e=>document.getElementById('sessions').innerText='Error loading sessions');
+  </script>
+</body>
+</html>

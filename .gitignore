@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+.venv/
+venv/
+
+# Visual Studio
+.vs/
+
+# Node
+node_modules/
+npm-debug.log
+package-lock.json
+
+# Data (generated at runtime)
+data/state.json
+data/reports/
+data/uploads/
+
+# LaTeX build artifacts
+docs/latex/*.aux
+docs/latex/*.log
+docs/latex/*.out
+docs/latex/*.toc
+docs/latex/*.fls
+docs/latex/*.fdb_latexmk
+docs/latex/*.synctex.gz
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker
+.docker/
+
+# OS
+.DS_Store
+Thumbs.db

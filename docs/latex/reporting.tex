@@ -1,0 +1,82 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{hyperref,xcolor,booktabs,fancyhdr,titlesec,listings}
+\usepackage[T1]{fontenc}\usepackage{lmodern}
+
+\definecolor{cyber}{HTML}{00FFD6}
+\definecolor{mg}{HTML}{FF66AC}
+\hypersetup{colorlinks,linkcolor=cyber,urlcolor=cyber}
+
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\textcolor{cyber}{\textbf{FLLC CYBERDECK}}}
+\fancyhead[R]{\textcolor{mg}{\thepage}}
+\fancyfoot[C]{\small\textcolor{gray}{Reporting Specification}}
+
+\titleformat{\section}{\Large\bfseries\color{cyber}}{\thesection}{1em}{}
+
+\lstset{basicstyle=\ttfamily\small,backgroundcolor=\color{black!5},
+        frame=single,rulecolor=\color{gray},breaklines=true}
+
+\title{%
+  {\Huge\bfseries\textcolor{cyber}{Reporting Specification}}\\[6pt]
+  {\Large Findings Severity Matrix \& Export Workflow}\\[4pt]
+  {\normalsize Version 2.0 --- \today}
+}
+\author{FLLC Engineering Division}
+\date{}
+
+\begin{document}
+\maketitle\thispagestyle{fancy}
+\tableofcontents\newpage
+
+\section{Report Structure}
+Every generated report contains the following sections in order:
+\begin{enumerate}
+  \item Title page (project name, date, classification)
+  \item Project metadata (ID, authorization scope, analyst)
+  \item Authorization statement
+  \item Executive summary
+  \item Scope of assessment
+  \item Inventory summary (target devices)
+  \item Findings table with severity matrix
+  \item Evidence references (with SHA-256)
+  \item Analyst notes
+  \item Recommendations
+  \item Appendix
+\end{enumerate}
+
+\section{Severity Matrix}
+\begin{tabular}{llcp{7cm}}
+\toprule
+\textbf{Level} & \textbf{Color} & \textbf{Score} & \textbf{Description} \\
+\midrule
+CRITICAL & \textcolor{red}{Red}       & 9.0--10.0 & Immediate risk, full compromise possible \\
+HIGH     & \textcolor{orange}{Orange} & 7.0--8.9  & Significant risk, exploitation likely \\
+MEDIUM   & \textcolor{yellow}{Yellow} & 4.0--6.9  & Moderate risk, exploitation possible \\
+LOW      & \textcolor{cyan}{Cyan}     & 0.1--3.9  & Minor risk, limited impact \\
+INFO     & \textcolor{gray}{Gray}     & 0.0       & Informational, no direct risk \\
+\bottomrule
+\end{tabular}
+
+\section{Export Workflow}
+\begin{enumerate}
+  \item Navigate to report detail page
+  \item Click \textbf{Print / Export to PDF} button
+  \item Browser print dialog opens with print CSS applied
+  \item Select ``Save as PDF'' destination
+  \item Report exports as single-file PDF with all styling
+\end{enumerate}
+
+\section{API Endpoints}
+\begin{lstlisting}
+POST /reports/generate   - Generate report for project
+GET  /reports            - List all reports
+GET  /reports/{id}       - Get report metadata
+GET  /reports/{id}/view  - View rendered HTML report
+\end{lstlisting}
+
+\vfill
+\begin{center}
+\textcolor{gray}{\small\copyright\ FLLC \the\year.  For internal authorized use only.}
+\end{center}
+\end{document}

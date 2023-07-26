@@ -1,0 +1,116 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{hyperref,xcolor,booktabs,fancyhdr,titlesec,listings,longtable}
+\usepackage[T1]{fontenc}\usepackage{lmodern}
+
+\definecolor{cyber}{HTML}{00FFD6}
+\definecolor{mg}{HTML}{FF66AC}
+\hypersetup{colorlinks,linkcolor=cyber,urlcolor=cyber}
+
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\textcolor{cyber}{\textbf{FLLC CYBERDECK}}}
+\fancyhead[R]{\textcolor{mg}{\thepage}}
+\fancyfoot[C]{\small\textcolor{gray}{Hardware Analysis Workflows}}
+
+\titleformat{\section}{\Large\bfseries\color{cyber}}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries\color{mg}}{\thesubsection}{1em}{}
+
+\lstset{basicstyle=\ttfamily\small,backgroundcolor=\color{black!5},
+        frame=single,rulecolor=\color{gray},breaklines=true}
+
+\title{%
+  {\Huge\bfseries\textcolor{cyber}{Hardware Analysis Workflows}}\\[6pt]
+  {\Large UART \textbullet\ I2C \textbullet\ SPI \textbullet\ JTAG/SWD \textbullet\ eMMC}\\[4pt]
+  {\normalsize Version 2.0 --- \today}
+}
+\author{FLLC Engineering Division}
+\date{}
+
+\begin{document}
+\maketitle\thispagestyle{fancy}
+\tableofcontents\newpage
+
+\section{Pre-Session Checklist}
+Before \emph{any} hardware session:
+\begin{enumerate}
+  \item Verify project authorization scope covers the target device
+  \item Confirm target device identification (vendor, model, serial)
+  \item Measure and verify voltage levels before connection
+  \item Document wiring with photos before powering on
+  \item Ensure evidence capture tools are ready (logic analyzer, camera)
+\end{enumerate}
+
+\section{UART Analysis Workflow}
+\subsection{Equipment}
+USB-to-serial adapter, logic analyzer, multimeter, jumper wires.
+\subsection{Procedure}
+\begin{enumerate}
+  \item Identify TX, RX, GND, VCC pins with multimeter
+  \item Verify voltage (typically 3.3\,V or 1.8\,V)
+  \item Connect adapter: TX$\to$RX, RX$\to$TX, GND$\to$GND
+  \item Set baud rate (common: 115200, 9600, 57600)
+  \item Capture boot log and interactive shell output
+  \item Document all observations in session record
+\end{enumerate}
+
+\section{I2C Analysis Workflow}
+\subsection{Equipment}
+Logic analyzer, I2C-capable adapter, multimeter.
+\subsection{Procedure}
+\begin{enumerate}
+  \item Identify SDA, SCL, GND pins
+  \item Verify pull-up resistors and voltage levels
+  \item Scan address range (0x00--0x7F)
+  \item Dump EEPROM contents if authorized
+  \item Capture bus traffic with logic analyzer
+\end{enumerate}
+
+\section{SPI Analysis Workflow}
+\subsection{Equipment}
+SPI flash programmer, logic analyzer, SOIC clip.
+\subsection{Procedure}
+\begin{enumerate}
+  \item Identify MOSI, MISO, SCLK, CS, GND pins
+  \item Verify voltage and chip specifications
+  \item Read flash contents with programmer
+  \item Compute SHA-256 of extracted firmware
+  \item Upload artifact and record in evidence tracker
+\end{enumerate}
+
+\section{JTAG/SWD Analysis Workflow}
+\subsection{Equipment}
+JTAG adapter (J-Link, OpenOCD-compatible), multimeter.
+\subsection{Procedure}
+\begin{enumerate}
+  \item Identify TCK/SWCLK, TMS/SWDIO, TDI, TDO, GND
+  \item Scan JTAG chain for device IDs
+  \item Verify debug access level (boundary scan, memory read)
+  \item Dump firmware if authorized
+  \item Record chain information and observations
+\end{enumerate}
+
+\section{eMMC Analysis Workflow}
+\subsection{Equipment}
+eMMC adapter/reader, SOIC clip or direct solder, logic analyzer.
+\subsection{Procedure}
+\begin{enumerate}
+  \item Identify CMD, CLK, DAT0--DAT3, GND pins
+  \item Verify voltage (1.8\,V or 3.3\,V)
+  \item Read partitions with adapter tool
+  \item Compute SHA-256 of extracted image
+  \item Mount and analyze filesystem contents
+\end{enumerate}
+
+\section{Evidence Handling}
+\begin{itemize}
+  \item All extracted firmware and data \textbf{must} have SHA-256 hashes recorded
+  \item Photos of wiring and board layout are \textbf{mandatory}
+  \item Use the \texttt{POST /upload} endpoint to store artifacts
+  \item Link artifacts to sessions via the \texttt{artifacts} field
+\end{itemize}
+
+\vfill
+\begin{center}
+\textcolor{gray}{\small\copyright\ FLLC \the\year.  For internal authorized use only.}
+\end{center}
+\end{document}

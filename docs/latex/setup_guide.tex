@@ -1,0 +1,131 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{hyperref,xcolor,booktabs,fancyhdr,titlesec,listings}
+\usepackage[T1]{fontenc}\usepackage{lmodern}
+
+\definecolor{cyber}{HTML}{00FFD6}
+\definecolor{mg}{HTML}{FF66AC}
+\hypersetup{colorlinks,linkcolor=cyber,urlcolor=cyber}
+
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\textcolor{cyber}{\textbf{FLLC CYBERDECK}}}
+\fancyhead[R]{\textcolor{mg}{\thepage}}
+\fancyfoot[C]{\small\textcolor{gray}{Setup \& Deployment Guide}}
+
+\titleformat{\section}{\Large\bfseries\color{cyber}}{\thesection}{1em}{}
+
+\lstset{basicstyle=\ttfamily\small,backgroundcolor=\color{black!5},
+        frame=single,rulecolor=\color{gray},breaklines=true}
+
+\title{%
+  {\Huge\bfseries\textcolor{cyber}{Setup \& Deployment Guide}}\\[6pt]
+  {\Large Docker Compose \textbullet\ Raspberry Pi 400 \textbullet\ CI/CD}\\[4pt]
+  {\normalsize Version 2.0 --- \today}
+}
+\author{FLLC Engineering Division}
+\date{}
+
+\begin{document}
+\maketitle\thispagestyle{fancy}
+\tableofcontents\newpage
+
+\section{Prerequisites}
+\begin{itemize}
+  \item Docker Engine 24+ and Docker Compose v2
+  \item Git
+  \item (Optional) Ollama for local AI
+\end{itemize}
+
+\section{Quick Start}
+\begin{lstlisting}[language=bash]
+git clone https://github.com/Personfu/CyberDeck.git
+cd CyberDeck/infra/docker
+docker compose up --build
+\end{lstlisting}
+\begin{itemize}
+  \item Web UI: \url{http://localhost:3000}
+  \item API: \url{http://localhost:8000}
+  \item Health: \url{http://localhost:8000/healthz}
+\end{itemize}
+
+\section{Default Credentials}
+\begin{tabular}{ll}
+\toprule
+\textbf{Username} & \textbf{Password} \\
+\midrule
+admin & cyberdeck \\
+\bottomrule
+\end{tabular}
+
+\textbf{Change immediately after first login.}
+
+\section{Raspberry Pi 400 Deployment}
+\begin{lstlisting}[language=bash]
+# On Pi 400 running Kali ARM or Raspberry Pi OS
+sudo ./scripts/requirements_setup.sh
+sudo ./scripts/lcd_install.sh     # DFRobot 3.5" TFT
+sudo reboot
+sudo ./scripts/tplink_patch.sh    # TL-WN722N WiFi
+sudo reboot
+
+# Start CyberDeck platform
+cd CyberDeck/infra/docker
+docker compose up --build -d
+\end{lstlisting}
+
+\subsection{Display Config}
+In \texttt{/boot/config.txt}:
+\begin{lstlisting}
+dtoverlay=waveshare35a,rotate=270,invertx=1,swapxy=1
+\end{lstlisting}
+
+\subsection{Hardware BOM}
+\begin{tabular}{lll}
+\toprule
+\textbf{\#} & \textbf{Component} & \textbf{Notes} \\
+\midrule
+1 & Raspberry Pi 400        & Keyboard SBC, USB-C power \\
+2 & DFRobot 3.5'' TFT       & SPI, waveshare35a overlay \\
+3 & Adafruit CyberDeck      & Enclosure / mounting \\
+4 & ANKO Battery Pack        & 5V/2A USB-C \\
+5 & TP-Link TL-WN722N v2/v3 & External WiFi, needs driver patch \\
+\bottomrule
+\end{tabular}
+
+\section{Running Tests}
+\begin{lstlisting}[language=bash]
+cd apps/api
+pip install -r reqs.txt
+pytest test_api.py -v
+\end{lstlisting}
+
+\section{Building LaTeX Documentation}
+\begin{lstlisting}[language=bash]
+cd docs/latex
+# Requires texlive-latex-base, texlive-latex-extra
+for f in *.tex; do latexmk -pdf "$f"; done
+\end{lstlisting}
+
+\section{GitHub Actions}
+The repository includes two workflows:
+\begin{description}
+  \item[ci.yml] Runs on push/PR --- API tests, LaTeX build, Docker build, Compose smoke test
+  \item[release.yml] Runs on tags --- publishes images to GHCR, attaches PDFs to release
+\end{description}
+
+\section{Environment Variables}
+\begin{tabular}{lp{8cm}}
+\toprule
+\textbf{Variable} & \textbf{Description} \\
+\midrule
+\texttt{DATA\_DIR}  & Data directory path (default: \texttt{/data}) \\
+\texttt{API\_URL}   & API base URL for web/worker \\
+\texttt{JWT\_SECRET} & Secret for JWT signing (default: \texttt{cyberdeck-secret-change-me}) \\
+\bottomrule
+\end{tabular}
+
+\vfill
+\begin{center}
+\textcolor{gray}{\small\copyright\ FLLC \the\year.  For internal authorized use only.}
+\end{center}
+\end{document}

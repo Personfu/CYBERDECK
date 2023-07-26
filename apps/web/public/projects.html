@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Projects - FLLC CyberDeck</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #050505; color: #bfffcf; font-family: 'Segoe UI', 'Inter', monospace; min-height: 100vh; }
+    header { padding: 20px 30px; border-bottom: 3px solid #00ffd6; background: #0a0a0a; }
+    h1 { text-transform: uppercase; letter-spacing: 3px; font-size: 1.5rem; color: #00ffd6; }
+    nav { padding: 15px 30px; background: #0a0a0a; border-bottom: 1px solid #222; }
+    nav a { color: #7df; text-decoration: none; margin-right: 25px; text-transform: uppercase; font-size: 13px; }
+    nav a:hover { color: #00ffd6; }
+    main { padding: 30px; max-width: 1200px; margin: 0 auto; }
+    .panel { background: #0a0a0a; border: 1px solid #222; border-radius: 8px; padding: 25px; margin: 20px 0; }
+    .panel h2 { color: #00ffd6; text-transform: uppercase; font-size: 13px; border-bottom: 1px solid #333; padding-bottom: 12px; margin-bottom: 15px; }
+    .project-card { background: #071010; border: 1px solid #003; border-radius: 6px; padding: 20px; margin: 12px 0; transition: all 0.2s; }
+    .project-card:hover { border-color: #00ffd6; }
+    .project-card h3 { color: #00ffd6; margin-bottom: 10px; }
+    .project-card p { color: #888; font-size: 13px; margin-bottom: 8px; }
+    .chip { display: inline-block; padding: 3px 8px; background: #001a1a; color: #0f0; border-radius: 4px; font-size: 10px; text-transform: uppercase; margin-right: 8px; }
+    .project-card a { color: #7df; text-decoration: none; font-size: 12px; }
+    .project-card a:hover { color: #00ffd6; }
+    footer { text-align: center; padding: 30px; color: #444; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <header><h1>FLLC CyberDeck - Projects</h1></header>
+  <nav>
+    <a href="/">DASHBOARD</a>
+    <a href="/projects">PROJECTS</a>
+    <a href="/sessions">SESSIONS</a>
+    <a href="/reports">REPORTS</a>
+    <a href="/settings">SETTINGS</a>
+    <a href="/safety">SAFETY</a>
+  </nav>
+  <main>
+    <div class="panel">
+      <h2>All Projects</h2>
+      <div id="list">Loading...</div>
+    </div>
+  </main>
+  <footer>FLLC CyberDeck - Authorized Hardware Analysis Platform</footer>
+  <script>
+    fetch('/api/projects').then(r=>r.json()).then(data=>{
+      const html = data.map(p=>`
+        <div class="project-card">
+          <h3>${p.name}</h3>
+          <p>${p.summary || 'No summary'}</p>
+          <span class="chip">${p.classification}</span>
+          <span class="chip">${p.authorization_scope ? 'AUTHORIZED' : 'PENDING'}</span>
+          <br/><br/>
+          <a href="/projects/${p.id}">→ View Details</a>
+        </div>
+      `).join('');
+      document.getElementById('list').innerHTML = html || '<p>No projects found</p>';
+    }).catch(e=>{document.getElementById('list').innerText='Error loading projects'});
+  </script>
+</body>
+</html>

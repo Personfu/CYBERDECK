@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Report View - FLLC CyberDeck</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #050505; color: #bfffcf; font-family: 'Segoe UI', 'Inter', monospace; min-height: 100vh; }
+    header { padding: 20px 30px; border-bottom: 3px solid #00ffd6; background: #0a0a0a; }
+    h1 { text-transform: uppercase; letter-spacing: 3px; font-size: 1.5rem; color: #00ffd6; }
+    nav { padding: 15px 30px; background: #0a0a0a; border-bottom: 1px solid #222; }
+    nav a { color: #7df; text-decoration: none; margin-right: 25px; text-transform: uppercase; font-size: 13px; }
+    nav a:hover { color: #00ffd6; }
+    main { padding: 30px; max-width: 1200px; margin: 0 auto; }
+    #report-container { background: #0a0a0a; border: 1px solid #222; border-radius: 8px; padding: 25px; margin: 20px 0; }
+    @media print { nav, header { display: none; } body { background: #fff; } }
+  </style>
+</head>
+<body>
+  <header><h1>FLLC CyberDeck - Report View</h1></header>
+  <nav>
+    <a href="/">DASHBOARD</a>
+    <a href="/projects">PROJECTS</a>
+    <a href="/sessions">SESSIONS</a>
+    <a href="/reports">REPORTS</a>
+    <a href="/settings">SETTINGS</a>
+    <a href="/safety">SAFETY</a>
+  </nav>
+  <main>
+    <div id="report-container">Loading report...</div>
+  </main>
+  <script>
+    const reportId = window.location.pathname.split('/').pop();
+    fetch(`/api/reports/${reportId}/view`)
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById('report-container').innerHTML = html;
+      })
+      .catch(e => {
+        document.getElementById('report-container').innerHTML = '<p style="color:#f66">Error loading report</p>';
+      });
+  </script>
+</body>
+</html>

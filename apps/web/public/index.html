@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FLLC CyberDeck - Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #050505; color: #bfffcf; font-family: 'Segoe UI', 'Inter', monospace; min-height: 100vh; }
+    header { padding: 20px 30px; border-bottom: 3px solid #00ffd6; background: #0a0a0a; display: flex; justify-content: space-between; align-items: center; }
+    h1 { text-transform: uppercase; letter-spacing: 3px; font-size: 1.5rem; color: #00ffd6; }
+    .chip { display: inline-block; padding: 4px 12px; background: #001a1a; color: #0f0; margin-left: 12px; border-radius: 4px; font-size: 11px; border: 1px solid #003; text-transform: uppercase; }
+    .chip.online { background: #002a00; color: #0f0; }
+    nav { padding: 15px 30px; background: #0a0a0a; border-bottom: 1px solid #222; }
+    nav a { color: #7df; text-decoration: none; margin-right: 25px; text-transform: uppercase; font-size: 13px; letter-spacing: 1px; }
+    nav a:hover { color: #00ffd6; }
+    main { padding: 30px; max-width: 1200px; margin: 0 auto; }
+    .panel { background: #0a0a0a; border: 1px solid #222; border-radius: 8px; padding: 25px; margin: 20px 0; }
+    .panel h2 { color: #00ffd6; text-transform: uppercase; font-size: 13px; border-bottom: 1px solid #333; padding-bottom: 12px; margin-bottom: 15px; letter-spacing: 1px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+    .stat { background: #071010; border: 1px solid #003; border-radius: 6px; padding: 20px; text-align: center; }
+    .stat-value { font-size: 2.5rem; color: #00ffd6; font-weight: bold; }
+    .stat-label { color: #888; text-transform: uppercase; font-size: 11px; margin-top: 8px; letter-spacing: 1px; }
+    .quick-links a { display: block; padding: 12px 15px; background: #071010; border: 1px solid #003; border-radius: 4px; color: #7df; text-decoration: none; margin: 8px 0; transition: all 0.2s; }
+    .quick-links a:hover { background: #0a1515; border-color: #00ffd6; }
+    footer { text-align: center; padding: 30px; color: #444; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>FLLC CyberDeck <span style="color:#ff66ac;font-size:14px;font-weight:normal">Raspberry Pi 400</span></h1>
+    <div>
+      <span class="chip online">ONLINE</span>
+      <span class="chip">v2.0.0</span>
+      <span class="chip" style="background:#1a001a;color:#ff66ac;border-color:#330033">PI400</span>
+    </div>
+  </header>
+  <nav>
+    <a href="/">DASHBOARD</a>
+    <a href="/projects">PROJECTS</a>
+    <a href="/sessions">SESSIONS</a>
+    <a href="/reports">REPORTS</a>
+    <a href="/settings">SETTINGS</a>
+    <a href="/safety">SAFETY</a>
+  </nav>
+  <main>
+    <div class="panel">
+      <h2>System Overview</h2>
+      <div class="grid">
+        <div class="stat">
+          <div class="stat-value" id="project-count">-</div>
+          <div class="stat-label">Projects</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="report-count">-</div>
+          <div class="stat-label">Reports</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="artifact-count">-</div>
+          <div class="stat-label">Artifacts</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="api-status">-</div>
+          <div class="stat-label">API Status</div>
+        </div>
+      </div>
+    </div>
+    <div class="grid">
+      <div class="panel">
+        <h2>Quick Actions</h2>
+        <div class="quick-links">
+          <a href="/projects">→ View All Projects</a>
+          <a href="/reports">→ View Reports</a>
+          <a href="/reports/report-demo-1">→ Demo Report (with Severity Matrix)</a>
+          <a href="/settings">→ AI Settings / Ollama Config</a>
+          <a href="/safety">→ Safety Boundary</a>
+        </div>
+      </div>
+      <div class="panel">
+        <h2>Recent Activity</h2>
+        <div id="recent" style="color:#888;font-size:13px;">Loading...</div>
+      </div>
+    </div>
+  </main>
+  <footer>
+    FLLC CyberDeck - Authorized Hardware Analysis Platform - Internal Use Only
+  </footer>
+  <script>
+    async function loadDashboard() {
+      try {
+        const health = await fetch('/api/healthz').then(r=>r.json());
+        document.getElementById('api-status').textContent = health.status || 'ERROR';
+      } catch { document.getElementById('api-status').textContent = 'OFFLINE'; }
+
+      try {
+        const projects = await fetch('/api/projects').then(r=>r.json());
+        document.getElementById('project-count').textContent = projects.length;
+        const recent = projects.slice(0,3).map(p=>`<div style="padding:8px 0;border-bottom:1px solid #222">${p.name}</div>`).join('');
+        document.getElementById('recent').innerHTML = recent || 'No projects';
+      } catch { document.getElementById('project-count').textContent = '?'; }
+
+      try {
+        const reports = await fetch('/api/reports').then(r=>r.json());
+        document.getElementById('report-count').textContent = reports.length;
+      } catch { document.getElementById('report-count').textContent = '?'; }
+
+      try {
+        const artifacts = await fetch('/api/artifacts').then(r=>r.json());
+        document.getElementById('artifact-count').textContent = artifacts.length;
+      } catch { document.getElementById('artifact-count').textContent = '0'; }
+    }
+    loadDashboard();
+  </script>
+</body>
+</html>

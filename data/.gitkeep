@@ -1,0 +1,7 @@
+# Data Directory
+
+This directory contains:
+- `state.json` - Application state (SQLite-like JSON storage)
+- `reports/` - Generated HTML report artifacts
+
+This directory is mounted as a Docker volume for persistence.

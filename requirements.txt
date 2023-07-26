@@ -1,3 +1,13 @@
-os
-multiprocessing
-subprocess
+# FLLC CyberDeck MK-1.0 — Pi400 Ops Console
+# Python stdlib: os, json, shutil, multiprocessing, subprocess, pathlib, datetime
+#
+# External system tools (install via apt / package manager):
+#   sudo apt install -y tshark tcpdump nmap hashcat bettercap minicom i2c-tools
+#   sudo apt install -y lsusb usbutils raspi-gpio
+#
+# Optional cyberdeck peripherals (install per vendor docs):
+#   proxmark3  — https://github.com/RfidResearchGroup/proxmark3
+#   hackrf     — sudo apt install hackrf
+#   flipper    — serial via /dev/ttyACM0 (no pip package needed)
+#
+# No pip dependencies required — this tool wraps system binaries only.

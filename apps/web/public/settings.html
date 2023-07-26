@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Settings - FLLC CyberDeck</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #050505; color: #bfffcf; font-family: 'Segoe UI', 'Inter', monospace; min-height: 100vh; }
+    header { padding: 20px 30px; border-bottom: 3px solid #00ffd6; background: #0a0a0a; }
+    h1 { text-transform: uppercase; letter-spacing: 3px; font-size: 1.5rem; color: #00ffd6; }
+    nav { padding: 15px 30px; background: #0a0a0a; border-bottom: 1px solid #222; }
+    nav a { color: #7df; text-decoration: none; margin-right: 25px; text-transform: uppercase; font-size: 13px; }
+    nav a:hover { color: #00ffd6; }
+    main { padding: 30px; max-width: 800px; margin: 0 auto; }
+    .panel { background: #0a0a0a; border: 1px solid #222; border-radius: 8px; padding: 25px; margin: 20px 0; }
+    .panel h2 { color: #00ffd6; text-transform: uppercase; font-size: 13px; border-bottom: 1px solid #333; padding-bottom: 12px; margin-bottom: 15px; }
+    label { display: block; color: #0ff; text-transform: uppercase; font-size: 11px; margin-bottom: 8px; margin-top: 15px; }
+    select, input { width: 100%; padding: 12px; background: #071010; border: 1px solid #003; color: #bfffcf; border-radius: 4px; font-size: 14px; }
+    select:focus, input:focus { outline: none; border-color: #00ffd6; }
+    button { background: #00ffd6; color: #000; border: none; padding: 12px 24px; cursor: pointer; font-weight: bold; text-transform: uppercase; border-radius: 4px; margin-top: 20px; }
+    button:hover { background: #00ccaa; }
+    #status { margin-top: 15px; padding: 10px; border-radius: 4px; font-size: 13px; }
+    #status.success { background: #003300; color: #0f0; }
+    #status.error { background: #330000; color: #f66; }
+    footer { text-align: center; padding: 30px; color: #444; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <header><h1>FLLC CyberDeck - Settings</h1></header>
+  <nav>
+    <a href="/">DASHBOARD</a>
+    <a href="/projects">PROJECTS</a>
+    <a href="/sessions">SESSIONS</a>
+    <a href="/reports">REPORTS</a>
+    <a href="/settings">SETTINGS</a>
+    <a href="/safety">SAFETY</a>
+  </nav>
+  <main>
+    <div class="panel">
+      <h2>AI Assistant Configuration</h2>
+      <p style="color:#888;font-size:13px;margin-bottom:15px">Configure the local AI backend for summarization, draft findings, and report assistance. The application works fully without AI configured.</p>
+      <form id="ai-form">
+        <label>AI Backend</label>
+        <select name="backend" id="backend">
+          <option value="none">None (Disabled)</option>
+          <option value="ollama">Ollama (Local)</option>
+          <option value="openai-compatible-local">OpenAI-Compatible (Local)</option>
+        </select>
+        <label>Endpoint URL (if applicable)</label>
+        <input type="text" name="endpoint" id="endpoint" placeholder="http://localhost:11434" />
+        <button type="submit">Save Settings</button>
+      </form>
+      <div id="status"></div>
+    </div>
+    <div class="panel">
+      <h2>AI Capabilities</h2>
+      <ul style="list-style:none;color:#888;font-size:13px;">
+        <li style="padding:8px 0;border-bottom:1px solid #222">✓ Summarization of session notes</li>
+        <li style="padding:8px 0;border-bottom:1px solid #222">✓ Draft finding language generation</li>
+        <li style="padding:8px 0;border-bottom:1px solid #222">✓ Evidence clustering suggestions</li>
+        <li style="padding:8px 0;border-bottom:1px solid #222">✓ Component naming suggestions</li>
+        <li style="padding:8px 0;">✓ Report writing assistance</li>
+      </ul>
+      <p style="margin-top:15px;padding:10px;background:#1a0a00;border:1px solid #300;border-radius:4px;color:#f96;font-size:12px;">
+        ⚠ AI is never used for payload generation, exploitation, or unauthorized actions.
+      </p>
+    </div>
+  </main>
+  <footer>FLLC CyberDeck - Authorized Hardware Analysis Platform</footer>
+  <script>
+    fetch('/api/settings/ai').then(r=>r.json()).then(settings=>{
+      document.getElementById('backend').value = settings.backend || 'none';
+      if(settings.config && settings.config.endpoint) {
+        document.getElementById('endpoint').value = settings.config.endpoint;
+      }
+    });
+
+    document.getElementById('ai-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const backend = document.getElementById('backend').value;
+      const endpoint = document.getElementById('endpoint').value;
+      try {
+        const res = await fetch('/api/settings/ai', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({backend, config: {endpoint}})
+        });
+        const data = await res.json();
+        document.getElementById('status').className = 'success';
+        document.getElementById('status').textContent = `Settings saved: ${data.backend}`;
+      } catch (e) {
+        document.getElementById('status').className = 'error';
+        document.getElementById('status').textContent = 'Error saving settings';
+      }
+    });
+  </script>
+</body>
+</html>

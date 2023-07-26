@@ -1,0 +1,104 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{hyperref,xcolor,booktabs,fancyhdr,titlesec,enumitem}
+\usepackage[T1]{fontenc}\usepackage{lmodern}
+
+\definecolor{cyber}{HTML}{00FFD6}
+\definecolor{mg}{HTML}{FF66AC}
+\definecolor{warn}{HTML}{FF4444}
+\hypersetup{colorlinks,linkcolor=cyber,urlcolor=cyber}
+
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\textcolor{cyber}{\textbf{FLLC CYBERDECK}}}
+\fancyhead[R]{\textcolor{mg}{\thepage}}
+\fancyfoot[C]{\small\textcolor{gray}{Safety Boundary Document}}
+
+\titleformat{\section}{\Large\bfseries\color{cyber}}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries\color{mg}}{\thesubsection}{1em}{}
+
+\title{%
+  {\Huge\bfseries\textcolor{warn}{SAFETY BOUNDARY}}\\[6pt]
+  {\Large FLLC CyberDeck --- Operational Constraints}\\[4pt]
+  {\normalsize Version 2.0 --- \today}
+}
+\author{FLLC Engineering Division}
+\date{}
+
+\begin{document}
+\maketitle\thispagestyle{fancy}
+\tableofcontents\newpage
+
+\section{Purpose}
+This document defines the absolute safety boundaries for the FLLC CyberDeck
+platform. All operators, developers, and administrators \textbf{must} comply.
+
+\section{Classification}
+FLLC CyberDeck is an \textbf{authorized lab and field documentation platform}.
+It is \textbf{not}:
+\begin{itemize}[label=\textcolor{warn}{\textbullet}]
+  \item An offensive pentesting framework
+  \item An exploit runner or persistence platform
+  \item A credential theft toolkit
+  \item A malware delivery system
+  \item An evasion or unauthorized access tool
+\end{itemize}
+
+\section{Prohibited Activities}
+The following are \textbf{strictly prohibited}:
+\begin{enumerate}[label=\textcolor{warn}{\arabic*.}]
+  \item Exploit execution against any target
+  \item Brute-force attacks or credential harvesting
+  \item Malware or payload generation
+  \item Evasion workflows or stealth techniques
+  \item Persistence mechanisms or backdoor deployment
+  \item ``One-click attack'' automation
+  \item Unauthorized network scanning or intrusion
+  \item Data exfiltration beyond authorized evidence capture
+\end{enumerate}
+
+\section{Permitted Activities}
+\begin{enumerate}[label=\textcolor{cyber}{\arabic*.}]
+  \item Authorized hardware interface documentation
+  \item Evidence capture with chain-of-custody tracking
+  \item Passive IoT device inventory
+  \item Session notes and analyst observations
+  \item Report generation and PDF export
+  \item AI-assisted summarization and drafting (non-offensive only)
+  \item Pin mapping and voltage documentation
+  \item Firmware version tracking and artifact upload
+\end{enumerate}
+
+\section{Authorization Requirements}
+\begin{itemize}
+  \item All projects \textbf{must} define an authorization scope
+  \item Hardware sessions require target identification and authorization verification
+  \item Evidence artifacts are tracked with SHA-256 hashes for integrity
+  \item All API actions are logged with timestamps and user identity
+  \item Reports include mandatory authorization statements
+\end{itemize}
+
+\section{AI Usage Policy}
+AI assistants (Ollama, OpenAI-compatible) may \textbf{only} be used for:
+\begin{itemize}
+  \item Summarization of analyst notes
+  \item Drafting finding language
+  \item Evidence clustering
+  \item Component naming suggestions
+  \item Report-writing assistance
+\end{itemize}
+AI is \textbf{never} used for payload generation, exploitation planning, or
+any offensive capability.
+
+\section{Enforcement}
+\begin{itemize}
+  \item JWT authentication enforces user identity on all write operations
+  \item All state changes are logged with timestamps
+  \item Safety boundary page is permanently accessible in the UI at \texttt{/safety}
+  \item Violation of these constraints is grounds for immediate access revocation
+\end{itemize}
+
+\vfill
+\begin{center}
+\textcolor{gray}{\small\copyright\ FLLC \the\year.  For internal authorized use only.}
+\end{center}
+\end{document}

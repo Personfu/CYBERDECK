@@ -1,0 +1,127 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{hyperref,xcolor,booktabs,fancyhdr,titlesec,listings}
+\usepackage[T1]{fontenc}\usepackage{lmodern}
+
+\definecolor{cyber}{HTML}{00FFD6}
+\definecolor{mg}{HTML}{FF66AC}
+\hypersetup{colorlinks,linkcolor=cyber,urlcolor=cyber}
+
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\textcolor{cyber}{\textbf{FLLC CYBERDECK}}}
+\fancyhead[R]{\textcolor{mg}{\thepage}}
+\fancyfoot[C]{\small\textcolor{gray}{Local AI Integration Guide}}
+
+\titleformat{\section}{\Large\bfseries\color{cyber}}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries\color{mg}}{\thesubsection}{1em}{}
+
+\lstset{basicstyle=\ttfamily\small,backgroundcolor=\color{black!5},
+        frame=single,rulecolor=\color{gray},breaklines=true}
+
+\title{%
+  {\Huge\bfseries\textcolor{cyber}{Local AI Integration Guide}}\\[6pt]
+  {\Large Ollama \textbullet\ OpenAI-Compatible \textbullet\ None}\\[4pt]
+  {\normalsize Version 2.0 --- \today}
+}
+\author{FLLC Engineering Division}
+\date{}
+
+\begin{document}
+\maketitle\thispagestyle{fancy}
+\tableofcontents\newpage
+
+\section{Overview}
+FLLC CyberDeck supports three AI adapter backends.  The application functions
+\textbf{fully without any AI backend configured}.
+
+\section{Adapter: None}
+Default mode.  All AI endpoints return passthrough results (truncated input,
+generic suggestions).  No external calls are made.
+
+\section{Adapter: Ollama}
+\subsection{Setup}
+\begin{lstlisting}[language=bash]
+# Install Ollama
+curl -fsSL https://ollama.ai/install.sh | sh
+
+# Pull a model
+ollama pull llama3
+
+# Ollama runs on port 11434 by default
+\end{lstlisting}
+
+\subsection{Configuration}
+In the Settings page or via API:
+\begin{lstlisting}
+POST /settings/ai
+{
+  "backend": "ollama",
+  "config": {
+    "endpoint": "http://localhost:11434",
+    "model": "llama3"
+  }
+}
+\end{lstlisting}
+
+\subsection{Health Check}
+The adapter checks \texttt{GET /api/tags} on the Ollama endpoint.
+If unavailable, it falls back to the NoneAdapter gracefully.
+
+\subsection{Docker Compose}
+To run Ollama as part of the stack:
+\begin{lstlisting}[language=yaml]
+ollama:
+  image: ollama/ollama:latest
+  ports: ["11434:11434"]
+  volumes: ["ollama_data:/root/.ollama"]
+\end{lstlisting}
+
+\section{Adapter: OpenAI-Compatible}
+Any local server exposing \texttt{/v1/chat/completions}:
+\begin{itemize}
+  \item LM Studio
+  \item text-generation-webui with OpenAI extension
+  \item LocalAI
+  \item vLLM with OpenAI server mode
+\end{itemize}
+
+\subsection{Configuration}
+\begin{lstlisting}
+POST /settings/ai
+{
+  "backend": "openai-compatible-local",
+  "config": {
+    "endpoint": "http://localhost:8080/v1",
+    "model": "local-model",
+    "api_key": "none"
+  }
+}
+\end{lstlisting}
+
+\section{AI Capabilities}
+\begin{tabular}{lp{9cm}}
+\toprule
+\textbf{Endpoint} & \textbf{Description} \\
+\midrule
+\texttt{POST /ai/summarize}      & Summarize analyst notes \\
+\texttt{POST /ai/draft-finding}  & Draft professional finding language \\
+\texttt{POST /ai/suggest-names}  & Suggest component names \\
+\texttt{POST /ai/assist-report}  & Generate executive summary text \\
+\texttt{POST /ai/cluster}        & Cluster evidence items \\
+\bottomrule
+\end{tabular}
+
+\section{Safety Constraints}
+AI is \textbf{never} used for:
+\begin{itemize}
+  \item Payload or exploit generation
+  \item Attack planning or evasion
+  \item Credential harvesting
+  \item Any offensive capability
+\end{itemize}
+
+\vfill
+\begin{center}
+\textcolor{gray}{\small\copyright\ FLLC \the\year.  For internal authorized use only.}
+\end{center}
+\end{document}

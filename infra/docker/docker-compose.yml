@@ -1,0 +1,44 @@
+version: '3.8'
+services:
+  api:
+    build: ../../apps/api
+    container_name: fllc-cyberdeck-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../../data:/data
+    environment:
+      - DATA_DIR=/data
+      - JWT_SECRET=cyberdeck-secret-change-me
+
+  worker:
+    build: ../../apps/worker
+    container_name: fllc-cyberdeck-worker
+    depends_on:
+      - api
+    volumes:
+      - ../../data:/data
+    environment:
+      - API_URL=http://api:8000
+
+  web:
+    build: ../../apps/web
+    container_name: fllc-cyberdeck-web
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    environment:
+      - API_URL=http://api:8000
+
+  # Optional: uncomment to run Ollama locally for AI features
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   container_name: fllc-cyberdeck-ollama
+  #   ports:
+  #     - "11434:11434"
+  #   volumes:
+  #     - ollama_data:/root/.ollama
+
+# volumes:
+#   ollama_data:

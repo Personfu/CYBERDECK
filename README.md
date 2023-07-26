@@ -1,138 +1,253 @@
-## Pull request incoming ! 
+# FLLC CyberDeck MK-1.0 (Raspberry Pi 400)
 
-### I need to redo the LCD patch process to support the more common DFROBOT displays 
+> **Portable network auditing ops console & IoT peripheral workbench** — Pi400 cyberdeck, CLI-first, cyberpunk ops
+>
+> Built for the Pi 400 keyboard-computer, DFRobot 3.5" TFT, TP-Link WiFi adapter, and Adafruit CyberDeck enclosure.
+> Inspired by [SATUNIX/CYBERDECK](https://github.com/SATUNIX/CYBERDECK) — budget Pi 400 hardware builds.
+> **This is NOT a MACOBOX clone. No voltage measurement. The Pi400 is the ops hub.**
 
-### CMD IN,  /BOOT/CONFIG.TXT:
+![status](https://img.shields.io/badge/STATUS-ACTIVE-00ffd6?style=flat-square)
+![platform](https://img.shields.io/badge/PLATFORM-Pi400%20%7C%20Kali%20ARM-ff66ac?style=flat-square)
+![license](https://img.shields.io/badge/LICENSE-GPLv3-333?style=flat-square)
 
+---
+
+## What Is This?
+
+A **Pi400 CyberDeck CLI ops console** (`F600_AstraAudit.py` v6.0.0) plus a local-first web platform:
+
+| Category | Tools |
+|----------|-------|
+| **Network Capture** | Bettercap, TShark, Tcpdump, Nmap, Hashcat |
+| **Analyst Recon** | Wireless (aircrack-ng), ARP scan, Service enum, PCAP analysis, DNS recon |
+| **CyberDeck Peripherals** | Flipper Zero, Proxmark3 RDV4, HackRF/SDR, O.MG Cable, Shark Jack, WiFi Pineapple |
+| **Pi400 Ops** | GPIO/I2C/SPI/UART, system diagnostics, session log browser, tool dependency checker |
+| **Web Platform** | Project console, hardware sessions, IoT inventory, reporting, optional local AI |
+
+---
+
+## Hardware BOM (Budget CyberDeck)
+
+| # | Component | Notes |
+|---|-----------|-------|
+| 1 | **Raspberry Pi 400** | Keyboard-integrated SBC, USB-C power |
+| 2 | **DFRobot 3.5" TFT** | SPI display, waveshare35a overlay |
+| 3 | **Adafruit CyberDeck** | Enclosure / mounting kit |
+| 4 | **ANKO Battery Pack** | 5V / 2A USB-C — tested stable under load |
+| 5 | **TP-Link TL-WN722N v2/v3** | External WiFi — needs driver patch |
+
+### Display Config (`/boot/config.txt`)
 ```
 dtoverlay=waveshare35a,rotate=270,invertx=1,swapxy=1
 ```
 
+### Driver Patches
+```bash
+# Clone this repo
+git clone https://github.com/Personfu/CyberDeck.git
+cd CyberDeck
+
+# Pi400 driver setup (from SATUNIX/CYBERDECK heritage)
+sudo ./scripts/lcd_install.sh     # DFRobot/waveshare TFT
+sudo ./scripts/tplink_patch.sh    # TL-WN722N monitor-mode
+```
 
 ---
 
-# Tritium Cyber Defence © 2023
-![image](https://avatars.githubusercontent.com/u/120298024?v=4)
+## Quick Start (Docker Compose)
 
-This software comes with absolutely no warranty or liability
-
-# CYBERDECK MK-1.0
-
-Files and programs to build your own cyberdeck, using these scripts for ease of use on my pi400 cyberdeck build. 
-Its about as budget friendly I could get while keeping as much processing power I could squeeze out of a Pi. 
-Utilising Pi's keyboard computer combo and Adafruit / DFrobot screens and drivers, I created this nifty little network auditing and packet sniffing cyberdeck. 
-
-
-Apparently it looks like a yugioh card deck, see below: 
-
-![image](https://user-images.githubusercontent.com/111553838/235816204-10f7dd93-4c44-4003-a509-ce212c273afb.png)
-
-# INSTALLATION
-
-Clone the CYBERDECK repository using the following command:
-
+```bash
+cd infra/docker
+docker compose up --build
 ```
 
-git clone https://github.com/SATUNIX/CYBERDECK.git
+| Service | URL | Tech |
+|---------|-----|------|
+| Web UI | http://localhost:3000 | Express + cyberpunk HTML |
+| API | http://localhost:8000 | FastAPI + Pydantic |
+| Health | http://localhost:8000/healthz | → `{"status": "ONLINE"}` |
+
+### Default Login
+| Username | Password |
+|----------|----------|
+| `admin` | `cyberdeck` |
+
+**Change immediately** via the API or settings page.
+
+---
+
+## Pages
+
+| # | Page | Route |
+|---|------|-------|
+| 1 | Dashboard | `/` |
+| 2 | Projects | `/projects` |
+| 3 | Project Detail | `/projects/:id` |
+| 4 | Targets (in project) | via project detail |
+| 5 | Hardware Sessions | `/sessions` |
+| 6 | Session Detail | `/sessions/:id` |
+| 7 | Reports | `/reports` |
+| 8 | Report Detail / Print | `/reports/:id` |
+| 9 | Settings (AI config) | `/settings` |
+| 10 | Safety Boundary | `/safety` |
+
+---
+
+## API Routes
 
 ```
-
-Navigate to the CYBERDECK directory:
-
+GET    /healthz
+POST   /auth/login
+GET    /projects
+POST   /projects
+GET    /projects/{id}
+GET    /projects/{id}/targets
+POST   /projects/{id}/targets
+GET    /projects/{id}/targets/export.csv
+POST   /projects/{id}/targets/import
+GET    /projects/{id}/sessions
+POST   /projects/{id}/sessions
+GET    /reports
+POST   /reports/generate
+GET    /reports/{id}
+GET    /reports/{id}/view
+POST   /upload
+GET    /uploads/{artifact_id}/{filename}
+GET    /artifacts
+GET    /settings/ai
+POST   /settings/ai
+POST   /ai/summarize
+POST   /ai/draft-finding
+POST   /ai/suggest-names
+POST   /ai/cluster
+POST   /ai/assist-report
 ```
 
-cd CYBERDECK
+---
 
+## Seed Data
+
+The API seeds on first boot with realistic Pi400 CyberDeck data:
+
+- **Project**: `PI400-BENCH-LAB` — bench lab hardware documentation
+- **Project**: `PASSIVE-IOT-INVENTORY` — lab IoT device tracking
+- **Targets**: ESP32 sensor, DFRobot TFT, TP-Link WN722N, Pi400 host
+- **Sessions**: UART on ESP32, SPI on DFRobot TFT
+- **Report**: Pi400 CyberDeck bench assessment with severity-rated findings
+
+---
+
+## Reports & Severity Matrix
+
+Reports include a full severity matrix:
+
+| Level | CVSS | Color |
+|-------|------|-------|
+| **CRITICAL** | 9.0–10.0 | Red |
+| **HIGH** | 7.0–8.9 | Orange |
+| **MEDIUM** | 4.0–6.9 | Yellow |
+| **LOW** | 0.1–3.9 | Cyan |
+| **INFO** | 0.0 | Gray |
+
+Export to PDF: open report → click **PRINT / EXPORT TO PDF** → browser saves as PDF.
+
+---
+
+## Local AI (Optional)
+
+| Backend | Config |
+|---------|--------|
+| `none` | Default — app works fully, no LLM needed |
+| `ollama` | `POST /settings/ai {"backend":"ollama","config":{"endpoint":"http://localhost:11434","model":"llama3"}}` |
+| `openai-compatible-local` | Any `/v1/chat/completions` endpoint (LM Studio, vLLM, LocalAI) |
+
+AI is used **only** for: summarisation, draft findings, evidence clustering, naming suggestions, report writing.
+AI is **never** used for: payload generation, exploitation, credential harvesting, evasion.
+
+---
+
+## Tests
+
+```bash
+cd apps/api
+pip install -r reqs.txt
+pytest test_api.py -v
 ```
 
-Run the scripts for different steps of the installation:
+Covers: health, auth, CRUD, upload, CSV import/export, AI adapters, full E2E happy path, severity matrix verification.
 
-(The programs will reboot throughout several times) 
-(They install drivers, edit config files, create oneshot processes etc) 
+---
 
+## CI/CD (GitHub Actions)
+
+| Workflow | Triggers | Jobs |
+|----------|----------|------|
+| `ci.yml` | push main/develop, PRs | pytest, LaTeX PDF build, Docker build matrix, Compose smoke test |
+| `release.yml` | `v*` tags | GHCR image push, GitHub Release with PDF artifacts |
+
+---
+
+## LaTeX Documentation
+
+```bash
+cd docs/latex
+latexmk -pdf architecture.tex safety_boundary.tex hardware_workflows.tex reporting.tex local_ai.tex setup_guide.tex
 ```
 
-sudo ./REQUIREMENTS_PATCH.sh
-reboot
-sudo ./LCD_INSTALLER.sh
-reboot
-sudo ./TPLINK_PATCH.sh
+PDFs are built automatically in CI and attached to releases.
 
+---
+
+## Safety Boundary
+
+This platform is for **authorized network auditing and lab documentation**. See [`docs/SAFETY_BOUNDARY.md`](docs/SAFETY_BOUNDARY.md).
+
+---
+
+## CLI Ops Console — Quick Start
+
+```bash
+# Run directly on Pi400
+python3 F600_AstraAudit.py
+
+# Or make it a system command
+chmod +x F600_AstraAudit.py
+sudo ln -sf $(pwd)/F600_AstraAudit.py /usr/local/bin/cyberdeck
+cyberdeck
 ```
 
-Once the installation is complete, reboot the system:
+All sessions logged to `~/CYBERDECK/sessions/`, captures to `~/CYBERDECK/captures/`.
+
+---
+
+## Repository Layout
 
 ```
-
-reboot
-
+├── F600_AstraAudit.py  CLI ops console (v6.0.0) — the main cyberdeck tool
+├── apps/api/          FastAPI backend (auth, CRUD, upload, CSV, AI, reports)
+├── apps/web/          Express + cyberpunk HTML UI
+├── apps/worker/       Background report generation
+├── docs/              Markdown documentation
+├── docs/latex/        LaTeX source → PDF (built in CI)
+├── hardware/          Session templates (UART, I2C, SPI, JTAG, eMMC)
+├── infra/docker/      docker-compose.yml
+├── scripts/           Pi400 setup scripts (LCD, TP-Link, etc.)
+├── data/              Runtime data (gitignored)
+└── .github/workflows/ CI + release pipelines
 ```
 
-After rebooting, the CYBERDECK tools will be available in the ~/CYBERDECK directory.
+---
 
+## Credits & Heritage
 
-#### Alternatively:
-run the bineriser.sh script to have the python program run as through a shell command no matter where you are in the Linux filesystem. 
-Make sure you don't move the github package or it will no longer work. 
+- **SATUNIX/CYBERDECK** — original Pi400 CyberDeck build scripts and hardware BOM
+- **David Bombal** — TP-Link TL-WN722N driver patch method
+- **Adafruit** — CyberDeck enclosure design
+- **DFRobot / Waveshare** — 3.5" TFT display drivers
 
-# HARDWARE Used  
-1. Pi400 - RASPBERRY PI 
-2. 3.5" DFROBOT TFT For raspberry pi 
-3. Adafruit Cyberdeck 
-4. ANKO Battery pack or something similar with 5V - 2A USBC or USBA to USBC (pi400 takes USBC)
-5. TPLINK TP-Link TL-WN722N (Version 2 or 3 is fine) 
+This project is **not affiliated with** MACOBOX, Lab401, or any commercial pentesting hardware vendor.
+It is an independent, open-source documentation platform inspired by the CyberDeck maker community.
 
-Save yourself some money by running my patch above. (Credit to David Bombal - couldn't have done it without you) 
-My Amazon package got stolen so I had to make to with a TPLINK instead of a $106AUD ALFA Card. 
+---
 
-![image](https://user-images.githubusercontent.com/111553838/235816261-7dbdffaf-4e7a-4004-a24c-8b85e254a1d3.png)
-
-# SOFTWARE (HOME GROWN)
-1. F600_AstraAudit.py 
-
-  A python tool to provide a one stop shop for CLI ease of use and configurations. 
-  Trust me, when your working on a 3.5" screen, you might as well make a program to automate small tasks. 
-  //Never go full skiddy. 
-  ([Final version 6.0.0] Auditing software)
-  (NO DEBUGGING CURRENTLY) 
-  (This software comes with absolutely no warranty or liability)
-  
-2. TRITIUM_LAN1 
-
-  Something else I started but didnt finish, I kept it in here for someone else to have a look at an improve. 
-  
-3. LCD CONFIG: 
-
-  Installs the drivers, runs a script for the LCD Display, then modifys the /boot/config.txt file to rotate the display and flip the touch input (not that you need to) 
-  
-4. TPLINK_CONFIG: 
-  Uses Davids patch and automates his process, Modified and simplified to run specifically on kali linux ARM machines such as what ive got. 
-    
-    
-
-# SOFTWARE (DRIVERS) 
-
-For the TPLINK "TL-WN722N" 
-The David Bombal patch: Run the shell script above using the method outlined by David Bombal on his github. My script is just an automation of this method. 
-Uses the aircrack-ng eus driver 
-
-For the 3.5" LCD on ADAFRUIT CYBERDECK 
-Connect to the internet or other WAN and run my patch with sudo privalages, you can check the file to make sure nothing fishy is going on. 
-This is specifically for the 3.5 inch waveshare model you can edit this it will have heaops of comments in the shell script. 
-
-
-
-# SOFTWARE (EXTERNAL)
-
-python 3.10.0 https://www.python.org/downloads/release/python-3100/ 
-
-tshark https://tshark.dev/setup/install/ 
-
-hashcat https://hashcat.net/hashcat/ 
-bettercap https://www.bettercap.org/ 
-
-tcpdump https://www.tcpdump.org/ 
-
-systemd networking tools (using ip a, etc) 
-
-Kali Linux ARM 64Bit https://kali.download/arm-images/kali-2023.1/kali-linux-2023.1-raspberry-pi-arm64.img.xz
+**FLLC Engineering Division** · Internal Use · MIT License
