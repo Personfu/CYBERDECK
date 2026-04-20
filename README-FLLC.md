@@ -181,15 +181,4 @@ Each template includes authorization checks, voltage verification, wiring notes,
 
 ---
 
-## Next Steps Roadmap
-
-1. Implement file upload for artifacts
-2. Add actual AI adapter integrations (Ollama, OpenAI-local)
-3. CSV import/export for IoT inventory
-4. User authentication and multi-user support
-5. Enhanced report templates
-6. Firmware analysis integration
-
----
-
-© FLLC, 2024. For internal authorized use only.
+© FLLC, 2026. For internal authorized use only.
