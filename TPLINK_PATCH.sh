@@ -36,7 +36,7 @@ sudo apt install bc build-essential libelf-dev linux-headers-$(uname -r) dkms
 
 # Clone and configure rtl8188eus
 sudo rmmod r8188eu.ko
-git clone https://github.com/aircrack-ng/rtl8188eus
+git clone https://github.com/lwfinger/rtw88
 cd rtl8188eus
 
 # Add blacklist entry to realtek.conf
