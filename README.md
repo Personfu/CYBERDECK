@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <strong>[ CYBERDECK MK-1.0: PRODUCTION RELEASE v6.0.0 ]</strong><br>
+  <strong>[ CYBERDECK MK-1.0: PRODUCTION RELEASE v1.0.0 ]</strong><br>
   <em>Maintained by Personfu @ <a href="https://fllc.net">fllc.net</a></em><br>
   <strong>Official Discord: <a href="https://discord.gg/Cd9qyvht7X">discord.gg/Cd9qyvht7X</a></strong>
 </p>
@@ -20,7 +20,7 @@
 
 ## ▓▒░ I. HARDWARE SCHEMATIC ARCHITECTURE
 
-**CYBERDECK MK-1.0** is built natively on the **Raspberry Pi 400** — a keyboard-integrated single-board computer powered by the Broadcom **BCM2711** quad-core Cortex-A72 SoC. Unlike the MACOBOX (a €3,300 commercial hardware pentest platform), this CyberDeck is a **budget-first, open-source ops console** that uses the Pi400 purely as a **connection hub to test environments** — no voltage measurement, no bus probing, no MACOBOX adapter boards.
+**CYBERDECK MK-1.0** is built natively on the **Raspberry Pi 400** — a keyboard-integrated single-board computer powered by the Broadcom **BCM2711** quad-core Cortex-A72 SoC. This CyberDeck is a **budget-first, open-source ops console** that uses the Pi400 purely as a **connection hub to test environments**
 
 The Pi400's 40-pin GPIO header, four USB 3.0 ports, Gigabit Ethernet, and dual-band WiFi provide the physical backbone for connecting cyberdeck peripherals: Flipper Zero, Proxmark3, HackRF, O.MG Cable, Shark Jack, WiFi Pineapple, and the TP-Link TL-WN722N for monitor-mode packet injection.
 
