@@ -14,13 +14,6 @@
 - A report generator with severity matrix and PDF export
 - An optional AI assistant for summarisation and drafting
 
-## What This Tool IS NOT
-
-- NOT a MACOBOX clone or competitor — no MACOBOX adapter board, no voltage measurement
-- NOT a standalone exploit framework — it wraps existing authorized tools
-- NOT a malware delivery system or evasion platform
-- NOT intended for production use — prototype with unsanitised input
-
 ## Authorized Use Only
 
 All tools require explicit authorization scope before use.
